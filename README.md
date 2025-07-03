@@ -1,3 +1,2 @@
-# nutrient_details
-
-A new Flutter project.
+# meal-details
+Meal Details demo screen
