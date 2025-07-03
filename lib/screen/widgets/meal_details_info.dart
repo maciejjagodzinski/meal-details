@@ -5,42 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:nutrient_details/models/models.dart';
-import 'package:nutrient_details/screens/poduct_details_screen_provider.dart';
+import 'package:nutrient_details/screen/poduct_details_screen_provider.dart';
 import 'package:nutrient_details/theme/app_colors.dart';
 import 'package:nutrient_details/theme/app_text_styles.dart';
-import 'package:soft_edge_blur/soft_edge_blur.dart';
-
-class ProductDetailsScreen extends ConsumerWidget {
-  const ProductDetailsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('Szczegóły posiłku',
-            style: AppTextStyles.medium12.copyWith(
-              color: AppColors.primaryWhite,
-            )),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primaryWhite),
-          onPressed: () {},
-        ),
-      ),
-      body: SafeArea(
-        top: false,
-        child: Stack(children: [
-          HeroImage(),
-          MealDetailsInfo(),
-        ]),
-      ),
-    );
-  }
-}
 
 class MealDetailsInfo extends ConsumerWidget {
   const MealDetailsInfo({super.key});
@@ -91,13 +58,14 @@ class MealDetailsInfo extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(product.title, style: AppTextStyles.headlineSemiBold),
+                      Text(product.title, style: AppTextStyles.headlineSemiBold.copyWith(letterSpacing: 0.096)),
                       const SizedBox(height: 12),
                       Text(product.description,
                           style: AppTextStyles.bodyRegular.copyWith(color: AppColors.textSecondary)),
                       const SizedBox(height: 32),
-                      Row(
+                      Wrap(
                         spacing: 8,
+                        runSpacing: 8,
                         children: List.generate(product.options.length, (i) {
                           final option = product.options[i];
                           return _SizeChip(
@@ -145,10 +113,7 @@ class MealDetailsInfo extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 32),
-                      Text('Składniki',
-                          style: AppTextStyles.headlineSemiBold.copyWith(
-                            height: 1.3,
-                          )),
+                      _SectionTitle(title: 'Składniki'),
                       const SizedBox(height: 8),
                       Text(product.ingredients,
                           style: AppTextStyles.regular14.copyWith(
@@ -156,14 +121,11 @@ class MealDetailsInfo extends ConsumerWidget {
                             letterSpacing: 0.01,
                           )),
                       const SizedBox(height: 32),
-                      Text('Alergeny',
-                          style: AppTextStyles.headlineSemiBold.copyWith(
-                            height: 1.3,
-                          )),
+                      _SectionTitle(title: 'Alergeny'),
                       const SizedBox(height: 12),
                       Row(
                         spacing: 8,
-                        children: product.allergens.map((e) => AllergenWidget(allergen: e)).toList(),
+                        children: product.allergens.map((e) => _AllergenWidget(allergen: e)).toList(),
                       ),
                     ],
                   ),
@@ -177,32 +139,17 @@ class MealDetailsInfo extends ConsumerWidget {
   }
 }
 
-class AllergenWidget extends StatelessWidget {
-  const AllergenWidget({super.key, required this.allergen});
-  final String allergen;
-
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+  final String title;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      spacing: 4,
-      children: [
-        _buildAllergenIcon(allergen),
-        Text(allergen, style: AppTextStyles.medium14),
-      ],
-    );
-  }
-
-  Widget _buildAllergenIcon(String allergen) {
-    switch (allergen) {
-      case 'Gluten':
-        return SvgPicture.asset('assets/icons/gluten_icon.svg', width: 16, height: 16);
-      case 'Mleko':
-        return SvgPicture.asset('assets/icons/milk_icon.svg', width: 16, height: 16);
-      case 'Pszenica':
-        return SvgPicture.asset('assets/icons/grain_icon.svg', width: 16, height: 16);
-      default:
-        return SvgPicture.asset('assets/icons/grain_icon.svg', width: 16, height: 16);
-    }
+    return Text(title,
+        style: AppTextStyles.headlineSemiBold.copyWith(
+          height: 1.3,
+          fontSize: 18,
+          letterSpacing: 0.08,
+        ));
   }
 }
 
@@ -284,66 +231,19 @@ class _SizeChipState extends State<_SizeChip> {
                         )
                       : null,
                 ),
-                child: Container(
+                child: SizedBox(
                   height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment: Alignment.center,
-                  child: Text(
-                    widget.label,
-                    style: AppTextStyles.medium14.copyWith(
-                      color: widget.selected ? AppColors.primaryWhite : AppColors.primaryBlack,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+                    child: Text(
+                      widget.label,
+                      style: AppTextStyles.medium14.copyWith(
+                        color: widget.selected ? AppColors.primaryWhite : AppColors.primaryBlack,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class HeroImage extends StatelessWidget {
-  const HeroImage({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: SoftEdgeBlur(
-        edges: [
-          EdgeBlur(
-            type: EdgeType.topEdge,
-            size: 100,
-            sigma: 10,
-            controlPoints: [
-              ControlPoint(position: 0.0, type: ControlPointType.visible),
-              ControlPoint(position: 0.8, type: ControlPointType.visible),
-              ControlPoint(position: 1.0, type: ControlPointType.transparent),
-            ],
-          ),
-        ],
-        child: ShaderMask(
-          shaderCallback: (rect) {
-            return LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF5D5D5D),
-                Color(0x005D5D5D),
-              ],
-              stops: [0.0, 0.25],
-            ).createShader(rect);
-          },
-          blendMode: BlendMode.multiply,
-          child: SizedBox(
-            width: double.infinity,
-            child: Image.asset(
-              'assets/images/header_hero.png',
-              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -413,29 +313,31 @@ class _NutrientWidget extends StatelessWidget {
   }
 }
 
-class MacroElementsGradientBar extends StatelessWidget {
-  const MacroElementsGradientBar({
-    required this.color,
-    super.key,
-    this.height = 40,
-  });
-
-  final double height;
-  final Color color;
+class _AllergenWidget extends StatelessWidget {
+  const _AllergenWidget({required this.allergen});
+  final String allergen;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Row(
+      spacing: 4,
       children: [
-        Container(
-          height: height,
-          decoration: BoxDecoration(
-            gradient: AppColors.nutrientGradientFromColor(color),
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
+        _buildAllergenIcon(allergen),
+        Text(allergen, style: AppTextStyles.medium14),
       ],
     );
+  }
+
+  Widget _buildAllergenIcon(String allergen) {
+    switch (allergen) {
+      case 'Gluten':
+        return SvgPicture.asset('assets/icons/gluten_icon.svg', width: 16, height: 16);
+      case 'Mleko':
+        return SvgPicture.asset('assets/icons/milk_icon.svg', width: 16, height: 16);
+      case 'Pszenica':
+        return SvgPicture.asset('assets/icons/grain_icon.svg', width: 16, height: 16);
+      default:
+        return SvgPicture.asset('assets/icons/grain_icon.svg', width: 16, height: 16);
+    }
   }
 }
